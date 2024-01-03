@@ -36,5 +36,6 @@ Reorder windows by `Ctrl + Shift + arrows`
 
 Prefix :`move-window current-window-name -t destination-session`  // -s is for source destination
 
+Tpm link : https://github.com/tmux-plugins/tpm
 
 The link for https://gist.github.com/andreyvit/2921703
