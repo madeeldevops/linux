@@ -1,0 +1,13 @@
+---
+service_name: "test"
+service_user: "ubuntu"
+service_group: "www-data"
+wsgi_file: "APP"
+service_working_dir: "/home/ubuntu/{{ service_name }}"
+service_exec_start: "/home/ubuntu/{{ service_name }}/venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --threads 2 \
+          --timeout 7200 \
+          --bind unix:/run/{{ service_name }}.sock \
+          {{ wsgi_file }}.wsgi:application"          

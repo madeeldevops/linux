@@ -1,0 +1,30 @@
+---
+- name: Install Nginx and configure site
+  # hosts: localhost
+  become: true # for elevated privilege
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Create Nginx configuration
+      template:
+        src: templates/nginx.j2 
+        dest: /etc/nginx/sites-available/{{ service_name }}
+      notify: Reload Nginx
+
+    - name: Enable the site
+      file:
+        src: /etc/nginx/sites-available/{{ service_name }}
+        dest: /etc/nginx/sites-enabled/{{ service_name }}
+        state: link
+      notify: Reload Nginx
+
+  handlers:
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded
