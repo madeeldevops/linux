@@ -1,7 +1,6 @@
 ---
 - name: Setup Django App and Virtual Environment on Remote Server
   hosts: lxc
-  become: true
   vars_files:
     - vars.yml
   tasks:
@@ -16,12 +15,13 @@
         state: present
         update_cache: yes
 
-    # creates project directory with execution permissions 
-    - name: Create project directory on remote server
-      file:
-        path: "{{ project_dir }}"
-        state: directory
-        mode: '0755'
+    # Clones the project from GitHub
+    - name: Clone project repository from GitHub
+      git:
+        repo: "{{ repo_url }}"  # URL of the GitHub repository defined in vars.yml
+        dest: "{{ project_dir }}"  # Directory where the repo will be cloned
+        update: yes  # Update the repo if it already exists
+
     # creates venv. Doesn't if it already exists
     - name: Create virtual environment
       command: python3 -m venv {{ venv_dir }}
@@ -33,7 +33,7 @@
         requirements: "{{ requirements_file }}"
         virtualenv: "{{ venv_dir }}"
 
-    - name: Create Django app
+    - name: Start Django app
       command: "{{ venv_dir }}/bin/django-admin startproject {{ project_name }}"
       args:
         chdir: "{{ project_dir }}"
