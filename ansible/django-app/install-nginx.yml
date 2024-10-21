@@ -1,6 +1,6 @@
 ---
 - name: Install Nginx and configure site
-  # hosts: localhost
+  hosts: localhost or <ip> # or you could refer to inventory file
   become: true # for elevated privilege
   vars_files:
     - vars.yml
@@ -13,13 +13,13 @@
     - name: Create Nginx configuration
       template:
         src: templates/nginx.j2 
-        dest: /etc/nginx/sites-available/{{ service_name }}
+        dest: /etc/nginx/sites-available/{{ project_name }}
       notify: Reload Nginx
 
     - name: Enable the site
       file:
-        src: /etc/nginx/sites-available/{{ service_name }}
-        dest: /etc/nginx/sites-enabled/{{ service_name }}
+        src: /etc/nginx/sites-available/{{ project_name }}
+        dest: /etc/nginx/sites-enabled/{{ project_name }}
         state: link
       notify: Reload Nginx
 

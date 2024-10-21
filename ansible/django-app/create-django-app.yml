@@ -2,14 +2,11 @@
 - name: Setup Django App and Virtual Environment on Remote Server
   hosts: lxc
   become: true
-  vars:
-    project_name: "my_django_app"
-    project_dir: "/home/{{ ansible_user }}/{{ project_name }}"
-    venv_dir: "{{ project_dir }}/venv"
-    requirements_file: "{{ playbook_dir }}/requirements.txt"  # Local path to requirements.txt
-
+  vars_files:
+    - vars.yml
   tasks:
 
+    # Installs these three packages. Doesn't if they already exist.
     - name: Ensure Python3, pip, and virtualenv are installed
       apt:
         name:
@@ -19,25 +16,21 @@
         state: present
         update_cache: yes
 
+    # creates project directory with execution permissions 
     - name: Create project directory on remote server
       file:
         path: "{{ project_dir }}"
         state: directory
         mode: '0755'
-
+    # creates venv. Doesn't if it already exists
     - name: Create virtual environment
       command: python3 -m venv {{ venv_dir }}
       args:
         creates: "{{ venv_dir }}"  # This ensures the command is only run if the venv doesn't already exist
 
-    - name: Upload requirements.txt to remote server
-      copy:
-        src: "{{ requirements_file }}"  # Assuming it's in the same repo folder
-        dest: "{{ project_dir }}/requirements.txt"
-
     - name: Install Python packages from requirements.txt in the virtual environment
       pip:
-        requirements: "{{ project_dir }}/requirements.txt"
+        requirements: "{{ requirements_file }}"
         virtualenv: "{{ venv_dir }}"
 
     - name: Create Django app
@@ -57,4 +50,3 @@
         chdir: "{{ project_dir }}/{{ project_name }}"
       async: 10  # Allow the task to run in the background
       poll: 0    # Don't wait for the task to finish, let it run in the background
-

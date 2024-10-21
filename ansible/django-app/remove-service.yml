@@ -1,6 +1,6 @@
 ---
 - name: Remove systemd service and socket units
-  # hosts: localhost
+  hosts: localhost
   become: true
   gather_facts: false
   vars_files:
@@ -9,12 +9,12 @@
   tasks:
     - name: Remove socket unit file
       file:
-        path: /etc/systemd/system/{{ service_name }}.socket
+        path: /etc/systemd/system/{{ project_name }}.socket
         state: absent
 
     - name: Remove service unit file
       file:
-        path: /etc/systemd/system/{{ service_name }}.service
+        path: /etc/systemd/system/{{ project_name }}.service
         state: absent
 
     - name: Reload systemd daemon

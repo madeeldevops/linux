@@ -1,23 +1,23 @@
 server {
     listen 80;
 
-    access_log {{ nginx_log_dir }}/{{ service_name }}-access.log;
-    error_log {{ nginx_log_dir }}/{{ service_name }}-error.log;
+    access_log {{ nginx_log_dir }}/{{ project_name }}-access.log;
+    error_log {{ nginx_log_dir }}/{{ project_name }}-error.log;
 
     location = /favicon.ico {
         access_log off;
         log_not_found off;
     }
     location /static/ {
-        root {{ service_working_dir }};
+        root {{ project_dir }};
     }
     location /media/ {
         include /etc/nginx/mime.types;
-        root {{ service_working_dir }};
+        root {{ project_dir }};
     }
 
     location / {
         include proxy_params;
-        proxy_pass http://unix:/run/{{ service_name }}.sock;
+        proxy_pass http://unix:/run/{{ project_name }}.sock;
     }
 }

@@ -1,13 +1,17 @@
 ---
-service_name: "test"
-service_user: "ubuntu"
-service_group: "www-data"
-wsgi_file: "APP"
-service_working_dir: "/home/ubuntu/{{ service_name }}"
-service_exec_start: "/home/ubuntu/{{ service_name }}/venv/bin/gunicorn \
+project_name: "test" # This is the name of your application
+project_user: "ubuntu" # This is your user. Mostly its root or ubuntu 
+project_group: "www-data" # This is your project group
+wsgi_file: "test" # This is the name of your project again
+project_dir: "/home/{{ project_user }}/{{ project_name }}" # working directory of your project 
+venv_dir: "{{ project_dir }}/venv" # venv directory of your project
+requirements_file: "{{ project_dir }}/requirements.txt" # path to your requirements file
+project_exec_start: "{{ project_dir }}/venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
           --threads 2 \
           --timeout 7200 \
-          --bind unix:/run/{{ service_name }}.sock \
-          {{ wsgi_file }}.wsgi:application"          
+          --bind unix:/run/{{ project_name }}.sock \
+          {{ wsgi_file }}.wsgi:application"
+nginx_log_dir: "/var/log/nginx" # Nginx log directory
+

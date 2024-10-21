@@ -1,6 +1,6 @@
 ---
 - name: Create systemd service and socket units
-  #hosts: localhost or <ip>
+  hosts: localhost or <ip> # Enter here manually or use reference in inventory file 
   become: true
   gather_facts: false
   vars_files:
@@ -10,13 +10,13 @@
     - name: Create socket unit file
       ansible.builtin.template:
         src: "templates/socket.j2"
-        dest: "/etc/systemd/system/{{ service_name }}.socket"
+        dest: "/etc/systemd/system/{{ project_name }}.socket"
         mode: "0644"
 
     - name: Create service unit file
       ansible.builtin.template:
         src: "templates/service.j2"
-        dest: "/etc/systemd/system/{{ service_name }}.service"
+        dest: "/etc/systemd/system/{{ project_name }}.service"
         mode: "0644"
 
     - name: Reload systemd daemon
@@ -25,20 +25,20 @@
         
     - name: Start the socket
       ansible.builtin.systemd:
-        name: "{{ service_name }}.socket"
+        name: "{{ project_name }}.socket"
         state: started
 
     - name: Enable the socket
       ansible.builtin.systemd:
-        name: "{{ service_name }}.socket"
+        name: "{{ project_name }}.socket"
         enabled: yes
 
     - name: Start the service
       ansible.builtin.systemd:
-        name: "{{ service_name }}"
+        name: "{{ project_name }}"
         state: started
 
     - name: Enable the service
       ansible.builtin.systemd:
-        name: "{{ service_name }}"
+        name: "{{ project_name }}"
         enabled: yes

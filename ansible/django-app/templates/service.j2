@@ -1,13 +1,13 @@
 [Unit]
-Description={{ service_name }} daemon
-Requires={{ service_name }}.socket
+Description={{ project_name }} daemon
+Requires={{ project_name }}.socket
 After=network.target
 
 [Service]
-User={{ service_user }}
-Group={{ service_group }}
-WorkingDirectory={{ service_working_dir }}
-ExecStart={{ service_exec_start }}
+User={{ project_user }}
+Group={{ project_group }}
+WorkingDirectory={{ project_dir }}
+ExecStart={{ project_exec_start }}
 
 [Install]
 WantedBy=multi-user.target

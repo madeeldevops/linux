@@ -1,8 +1,8 @@
 [Unit]
-Description={{ service_name }} socket
+Description={{ project_name }} socket
 
 [Socket]
-ListenStream=/run/{{ service_name }}.sock
+ListenStream=/run/{{ project_name }}.sock
 
 [Install]
 WantedBy=sockets.target
