@@ -20,6 +20,8 @@
       git:
         repo: "{{ repo_url }}"  # URL of the GitHub repository defined in vars.yml
         dest: "{{ project_dir }}"  # Directory where the repo will be cloned
+        single_branch: yes
+        version: master
         update: yes  # Update the repo if it already exists
 
     # creates venv. Doesn't if it already exists
@@ -33,20 +35,3 @@
         requirements: "{{ requirements_file }}"
         virtualenv: "{{ venv_dir }}"
 
-    - name: Start Django app
-      command: "{{ venv_dir }}/bin/django-admin startproject {{ project_name }}"
-      args:
-        chdir: "{{ project_dir }}"
-        creates: "{{ project_dir }}/{{ project_name }}"  # This ensures the command is only run if the project doesn't already exist
-
-    - name: Install gunicorn
-      pip:
-        name: gunicorn
-        virtualenv: "{{ venv_dir }}"
-
-    - name: Start gunicorn server
-      command: "{{ venv_dir }}/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 {{ project_name }}.wsgi:application"
-      args:
-        chdir: "{{ project_dir }}/{{ project_name }}"
-      async: 10  # Allow the task to run in the background
-      poll: 0    # Don't wait for the task to finish, let it run in the background
