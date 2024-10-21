@@ -14,9 +14,10 @@
           - python3-venv
         state: present
         update_cache: yes
+      become: true
 
     # Clones the project from GitHub
-    - name: Clone project repository from GitHub
+    - name: Clone project repository from Git
       git:
         repo: "{{ repo_url }}"  # URL of the GitHub repository defined in vars.yml
         dest: "{{ project_dir }}"  # Directory where the repo will be cloned
