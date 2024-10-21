@@ -1,2 +1,2 @@
 [<host_name>]
-<ip> ansible_user=<user. ubuntu or root> ansible_port=<if port binding is done. else remove it> 
+<ip> ansible_user=<ubuntu/root> ansible_port=<port> 
