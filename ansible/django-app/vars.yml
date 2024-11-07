@@ -1,9 +1,9 @@
 ---
-project_name: "test" # This is the name of your application
-project_user: "dev" # This is your user. Mostly its root or ubuntu 
+project_name: "project_name" # This is the name of your application
+project_user: "ubuntu" # This is your user. Mostly its root or ubuntu
 project_group: "www-data" # This is your project group
-wsgi_file: "test" # This is the name of your project again
-project_dir: "/home/{{ project_user }}/{{ project_name }}" # working directory of your project 
+wsgi_file: "wsgi_file_name" # This is the name of your project again
+project_dir: "/home/{{ project_user }}/{{ project_name }}" # working directory of your project
 venv_dir: "{{ project_dir }}/venv" # venv directory of your project
 requirements_file: "{{ project_dir }}/requirements.txt" # path to your requirements file
 project_exec_start: "{{ project_dir }}/venv/bin/gunicorn \
@@ -14,5 +14,5 @@ project_exec_start: "{{ project_dir }}/venv/bin/gunicorn \
           --bind unix:/run/{{ project_name }}.sock \
           {{ wsgi_file }}.wsgi:application"
 nginx_log_dir: "/var/log/nginx" # Nginx log directory
-repo_url: "https:<username>:<access-token-gitlab>@<repo url>"
-
+repo_url: "http://<user>:<glpat>@<gitlab-repo>"
+git_branch: "<branch-name>"

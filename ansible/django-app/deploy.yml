@@ -1,0 +1,12 @@
+---
+# This is the entry point that runs all the roles in sequence.
+
+- name: Deploy Django Application
+  hosts: lxc
+  # become: true
+  vars_files:
+    - vars.yml  # Global variables
+  roles:
+    - django_app
+    - systemd_service
+    - nginx

@@ -1,0 +1,33 @@
+---
+# Setup Django App and Virtual Environment on Remote Server
+
+- name: Ensure Python3, pip, and virtualenv are installed
+  ansible.builtin.package:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+    state: present
+    update_cache: true
+  become: true
+
+# Clones the project from GitHub
+- name: Clone project repository from Git
+  ansible.builtin.git:
+    repo: "{{ repo_url }}"  # URL of the GitHub repository defined in vars.yml
+    dest: "{{ project_dir }}"  # Directory where the repo will be cloned
+    version: "{{ git_branch }}"
+    force: true
+    update: true  # Update the repo if it already exists
+
+# creates venv. Doesn't if it already exists
+- name: Create virtual environment
+  ansible.builtin.command: python3 -m venv "{{ venv_dir }}"
+  args:
+    creates: "{{ venv_dir }}/bin/activate"
+
+- name: Install Python packages from requirements.txt in the virtual environment
+  ansible.builtin.pip:
+    requirements: "{{ requirements_file }}"
+    virtualenv: "{{ venv_dir }}"
+    virtualenv_command: "{{ venv_dir }}/bin/python3 -m venv"

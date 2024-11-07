@@ -1,0 +1,39 @@
+---
+
+- name: Install Nginx
+  ansible.builtin.package:
+    name: nginx
+    state: present
+    update_cache: true
+  become: true
+
+- name: Create Nginx configuration
+  ansible.builtin.template:
+    src: templates/nginx.conf.j2
+    dest: /etc/nginx/sites-available/{{ project_name }}
+    mode: "0644"
+  notify: Reload Nginx
+  become: true
+
+- name: Enable the site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/{{ project_name }}
+    dest: /etc/nginx/sites-enabled/{{ project_name }}
+    state: link
+  notify: Reload Nginx
+  become: true
+
+- name: Ensure Nginx is running and enabled
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+  become: true
+
+- name: Test Nginx configuration
+  ansible.builtin.command: nginx -t
+  register: nginx_test
+  failed_when: nginx_test.rc != 0
+  changed_when: false
+  notify: Reload Nginx
+  become: true

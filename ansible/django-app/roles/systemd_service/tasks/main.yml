@@ -1,0 +1,34 @@
+---
+
+- name: Create socket unit file
+  ansible.builtin.template:
+    src: "socket.j2"
+    dest: "/etc/systemd/system/{{ project_name }}.socket"
+    mode: "0644"
+  become: true
+
+- name: Create service unit file
+  ansible.builtin.template:
+    src: "service.j2"
+    dest: "/etc/systemd/system/{{ project_name }}.service"
+    mode: "0644"
+  become: true
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: Ensure the socket is started and enabled
+  ansible.builtin.systemd:
+    name: "{{ project_name }}.socket"
+    state: started
+    enabled: true
+  become: true
+
+- name: Ensure the service is started and enabled
+  ansible.builtin.systemd:
+    name: "{{ project_name }}.service"
+    state: started
+    enabled: true
+  become: true

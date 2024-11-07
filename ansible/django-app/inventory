@@ -1,2 +1,2 @@
-[<host_name>]
-<ip> ansible_user=<ubuntu/root> ansible_port=<port> 
+[lxc]
+adeel ansible_host=10.118.199.20  ansible_user=ubuntu

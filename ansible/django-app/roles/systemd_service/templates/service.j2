@@ -8,6 +8,7 @@ User={{ project_user }}
 Group={{ project_group }}
 WorkingDirectory={{ project_dir }}
 ExecStart={{ project_exec_start }}
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
