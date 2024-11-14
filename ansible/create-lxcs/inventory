@@ -1,0 +1,2 @@
+[remote_host]
+<remote-host> ansible_host=<ip> ansible_ssh_user=ubuntu

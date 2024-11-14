@@ -1,0 +1,43 @@
+---
+- name: Create and Configure LXC Container
+  hosts: remote_host
+  connection: ssh
+  gather_facts: false
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Create a started container
+      community.general.lxd_container:
+        name: "{{ item.container_name }}"
+        state: started
+        source:
+          type: image
+          mode: pull
+          server: "{{ remote_server }}"
+          protocol: simplestreams
+          alias: "{{ image_alias }}"
+        profiles: ["default"]
+        wait_for_ipv4_addresses: true
+      register: container_info
+      loop: "{{ containers }}"
+
+    - name: Ensure SSH directory exists in container
+      ansible.builtin.command:
+        cmd: "lxc exec {{ item.container_name }} -- mkdir -p /home/{{ container_user }}/.ssh"
+      loop: "{{ containers }}"
+
+    - name: Set ownership and permissions on .ssh directory
+      ansible.builtin.shell:
+        cmd: "lxc exec {{ item.container_name }} -- sh -c 'chown -R {{ container_user }}:{{ container_user }} /home/{{ container_user }}/.ssh && chmod 700 /home/{{ container_user }}/.ssh'"
+      loop: "{{ containers }}"
+
+    - name: Read local SSH public key
+      ansible.builtin.slurp:
+        src: "{{ ssh_public_key_path }}"
+      register: public_key_content
+
+    - name: Add public key content to authorized_keys in container
+      ansible.builtin.shell:
+        cmd: "echo '{{ public_key_content.content | b64decode }}' | lxc exec {{ item.container_name }} -- tee -a {{ destination_path }}"
+      loop: "{{ containers }}"
