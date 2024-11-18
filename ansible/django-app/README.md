@@ -86,12 +86,12 @@ The `systemd_service` role sets up systemd to manage the Django application as a
 The `postgresql` role will manage the PostgreSQL database setup on the target system, including creating the database, user, and assigning the necessary permissions.
 
 #### Key Tasks:
-- **Install PostgreSQL: Ensures Postgres is installed on the target system.
-- **Start and enable PostgreSQL service: Makes sure PostgreSQL is running and enabled to start on boot.
-- **Create PostgreSQL Database: Creates a database using the `postgres_db` variable.
-- **Create PostgreSQL User: Creates a user with the `postgres_user` and `postgres_password` defined in `vars.yml`.
-- **Configure PostgreSQL User Settings: Sets client encoding, transaction isolation level, and timezone for the new user.
-- **Grant Privileges: Grants the new user all privileges on the newly created database
+- **Install PostgreSQL**: Ensures Postgres is installed on the target system.
+- **Start and enable PostgreSQL service**: Makes sure PostgreSQL is running and enabled to start on boot.
+- **Create PostgreSQL Database**: Creates a database using the `postgres_db` variable.
+- **Create PostgreSQL User**: Creates a user with the `postgres_user` and `postgres_password` defined in `vars.yml`.
+- **Configure PostgreSQL User Settings**: Sets client encoding, transaction isolation level, and timezone for the new user.
+- **Grant Privileges**: Grants the new user all privileges on the newly created database
 
 Each role is designed to be independent and reusable, making it easy to customize or extend this setup for different environments.
 ## Notes
