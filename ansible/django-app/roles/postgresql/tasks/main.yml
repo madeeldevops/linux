@@ -1,0 +1,38 @@
+---
+- name: Ensure PostgreSQL is installed
+  ansible.builtin.package:
+    name: postgresql
+    state: present
+
+- name: Start and enable PostgreSQL service
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Create PostgreSQL database
+  ansible.builtin.command: >
+    sudo -u postgres psql -c "CREATE DATABASE {{ postgres_db }};"
+  args:
+    creates: "/var/lib/pgsql/data/{{ postgres_db }}"
+
+- name: Create PostgreSQL user
+  ansible.builtin.command: >
+    sudo -u postgres psql -c "CREATE USER {{ postgres_user }} WITH PASSWORD '{{ postgres_password }}';"
+
+- name: Configure PostgreSQL user settings
+  ansible.builtin.command: >
+    sudo -u postgres psql -c "ALTER ROLE {{ postgres_user }} SET client_encoding TO 'utf8';"
+  ignore_errors: true
+
+- name: Set default transaction isolation
+  ansible.builtin.command: >
+    sudo -u postgres psql -c "ALTER ROLE {{ postgres_user }} SET default_transaction_isolation TO 'read committed';"
+
+- name: Set timezone to UTC
+  ansible.builtin.command: >
+    sudo -u postgres psql -c "ALTER ROLE {{ postgres_user }} SET timezone TO 'UTC';"
+
+- name: Grant privileges on database
+  ansible.builtin.command: >
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE {{ postgres_db }} TO {{ postgres_user }};"

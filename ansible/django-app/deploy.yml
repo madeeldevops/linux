@@ -10,3 +10,4 @@
     - django_app
     - systemd_service
     - nginx
+    - postgresql

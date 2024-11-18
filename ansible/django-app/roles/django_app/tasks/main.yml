@@ -31,3 +31,12 @@
     requirements: "{{ requirements_file }}"
     virtualenv: "{{ venv_dir }}"
     virtualenv_command: "{{ venv_dir }}/bin/python3 -m venv"
+
+- name: Install specific Python packages in the virtual environment
+  ansible.builtin.pip:
+    name:
+      - django
+      - gunicorn
+      - psycopg2-binary
+    virtualenv: "{{ venv_dir }}"
+    virtualenv_command: "{{ venv_dir }}/bin/python3 -m venv"
