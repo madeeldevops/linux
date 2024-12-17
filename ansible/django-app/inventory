@@ -1,2 +1,2 @@
 [lxc]
-<user> ansible_host=<ip>  ansible_user=ubuntu
+<user> ansible_host=<ip>  ansible_user=ubuntu ansible_port<port>

@@ -3,6 +3,7 @@
   ansible.builtin.package:
     name: postgresql
     state: present
+  become: true
 
 - name: Start and enable PostgreSQL service
   ansible.builtin.service:

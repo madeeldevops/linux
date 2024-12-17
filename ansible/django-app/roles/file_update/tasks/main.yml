@@ -1,0 +1,74 @@
+---
+- name: Search for the file
+  ansible.builtin.find:
+    paths: "./"  # Base directory to start the search
+    patterns: "settings.py"  # File name or pattern to search for
+    file_type: file  # Look for files only
+    recurse: yes
+  register: found_files
+
+- name: Display the file path if found
+  debug:
+    msg: "File found at: {{ item.path }}"
+  with_items: "{{ found_files.files }}"
+  when: found_files.matched > 0
+
+- name: Update vars.yml with the file path
+  ansible.builtin.lineinfile:
+    path: vars.yml
+    regexp: '^found_file: .*'
+    line: "found_file: \"{{ found_files.files[0].path }}\""
+    create: yes
+  when: found_files.matched > 0
+
+- name: Notify if no file was found
+  debug:
+    msg: "No file found, vars.yml was not updated."
+  when: found_files.matched == 0
+
+- name: Update the DATABASES block in the Django settings file
+  ansible.builtin.blockinfile:
+    path: "{{ found_file }}"  # Path to your Django settings file
+    block: |
+      DATABASES = {
+          'default': {
+              'ENGINE': 'django.db.backends.postgresql_psycopg2',
+              'NAME': '{{ postgres_db }}',
+              'USER': '{{ postgres_user }}',
+              'PASSWORD': '{{ postgres_password }}',
+              'HOST': 'localhost',
+              'PORT': '5432',
+          }
+      }
+    marker: "# DATABASES block"
+    insertafter: "# }"  # Ensure insertion happens after this line
+
+- name: Run Django makemigrations
+  ansible.builtin.command:
+    cmd: "./manage.py makemigrations"
+    chdir: "{{ project_dir }}"  # Path to the Django project root
+  register: makemigrations_output
+
+- name: Show makemigrations output
+  debug:
+    var: makemigrations_output.stdout
+
+- name: Run Django migrate
+  ansible.builtin.command:
+    cmd: "./manage.py migrate"
+    chdir: "{{ project_dir }}"
+  register: migrate_output
+
+- name: Show migrate output
+  debug:
+    var: migrate_output.stdout
+
+- name: Collect static files
+  ansible.builtin.command:
+    cmd: "./manage.py collectstatic --noinput"
+    chdir: "{{ project_dir }}"
+  register: collectstatic_output
+
+- name: Show collectstatic output
+  debug:
+    var: collectstatic_output.stdout

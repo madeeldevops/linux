@@ -11,3 +11,4 @@
     - systemd_service
     - nginx
     - postgresql
+    - file_update
