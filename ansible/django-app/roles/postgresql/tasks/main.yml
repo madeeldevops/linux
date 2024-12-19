@@ -14,8 +14,6 @@
 - name: Create PostgreSQL database
   ansible.builtin.command: >
     sudo -u postgres psql -c "CREATE DATABASE {{ postgres_db }};"
-  args:
-    creates: "/var/lib/pgsql/data/{{ postgres_db }}"
 
 - name: Create PostgreSQL user
   ansible.builtin.command: >
