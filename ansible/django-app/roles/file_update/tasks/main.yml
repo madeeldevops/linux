@@ -26,9 +26,18 @@
     msg: "No file found, vars.yml was not updated."
   when: found_files.matched == 0
 
-- name: Update the DATABASES block in the Django settings file
-  ansible.builtin.blockinfile:
-    path: "{{ found_file }}"  # Path to your Django settings file
+- name: Ensure `import os` is added at the beginning of the file
+  lineinfile:
+    path: ./settings.py
+    line: "import os"
+    insertafter: '^"""'
+    state: present
+
+- name: Add PostgreSQL DATABASES block after the "# Password validation" line
+  blockinfile:
+    path: ./settings.py
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    insertbefore: '^# Internationalization.*'
     block: |
       DATABASES = {
           'default': {
@@ -40,8 +49,25 @@
               'PORT': '5432',
           }
       }
-    marker: "# DATABASES block"
-    insertafter: "# }"  # Ensure insertion happens after this line
+
+- name: Comment out the sqlite3 DATABASES block
+  replace:
+    path: ./settings.py
+    regexp: |
+      (?<!#)DATABASES\s*=\s*{\s*'default':\s*{\s*'ENGINE':\s*'django\.db\.backends\.sqlite3',\s*'NAME':\s*BASE_DIR\s*/\s*'db\.sqlite3',\s*}\s*}
+    replace: |
+      # DATABASES = {
+      #     'default': {
+      #         'ENGINE': 'django.db.backends.sqlite3',
+      #         'NAME': BASE_DIR / 'db.sqlite3',
+      #     }
+      # }
+
+- name: Add STATIC_ROOT to the end of the file
+  lineinfile:
+    path: ./settings.py
+    line: "STATIC_ROOT = os.path.join(BASE_DIR, 'static')"
+    insertafter: EOF
 
 - name: Run Django makemigrations
   ansible.builtin.command:
