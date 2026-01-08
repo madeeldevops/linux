@@ -1,0 +1,114 @@
+---
+- name: SSH hardening and key setup
+  hosts: servers
+  become: yes
+  vars:
+    ssh_public_keys:
+      - " << ssh-keys >> "
+
+  tasks:
+    - name: Ensure PubkeyAuthentication is enabled
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PubkeyAuthentication'
+        line: 'PubkeyAuthentication yes'
+        state: present
+        create: no
+
+    - name: Ensure PasswordAuthentication is disabled
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+        state: present
+        create: no
+
+    - name: Ensure LogLevel is set to VERBOSE
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?LogLevel'
+        line: 'LogLevel VERBOSE'
+        state: present
+        create: no
+
+    - name: Find SSH config files containing "PasswordAuthentication yes"
+      find:
+        paths: /etc/ssh
+        recurse: yes
+        file_type: file
+      register: ssh_files
+
+    - name: Remove "PasswordAuthentication yes" from override files
+      lineinfile:
+        path: "{{ item.path }}"
+        regexp: '^PasswordAuthentication\s+yes'
+        state: absent
+      loop: "{{ ssh_files.files }}"
+      when:
+        - item.path not in ['/etc/ssh/ssh_config', '/etc/ssh/sshd_config']
+
+    - name: Ensure authorized_keys file exists
+      file:
+        path: "/{{ ansible_user }}/.ssh/authorized_keys"
+        state: touch
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0600'
+
+    - name: Add SSH keys to authorized_keys
+      lineinfile:
+        path: "/{{ ansible_user }}/.ssh/authorized_keys"
+        line: "{{ item }}"
+        state: present
+        create: yes
+      loop: "{{ ssh_public_keys }}"
+
+    - name: Validate sshd configuration
+      command: sshd -t
+
+    - name: Restart SSH service
+      service:
+        name: ssh
+        state: restarted
+
+    - name: Create ubuntu user with password
+      user:
+        name: ubuntu
+        shell: /bin/bash
+        create_home: yes
+        password: "{{ 'ubuntu' | password_hash('sha512') }}"
+
+    - name: Add sudo rules for ubuntu user
+      copy:
+        dest: /etc/sudoers.d/ubuntu
+        content: |
+          ubuntu ALL=(ALL:ALL) ALL
+          ubuntu ALL=(ALL) NOPASSWD: ALL
+        owner: root
+        group: root
+        mode: '0440'
+
+    - name: Ensure .ssh directory exists for ubuntu
+      file:
+        path: /home/ubuntu/.ssh
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0700'
+
+    - name: Ensure authorized_keys exists for ubuntu
+      file:
+        path: /home/ubuntu/.ssh/authorized_keys
+        state: touch
+        owner: ubuntu
+        group: ubuntu
+        mode: '0600'
+
+    - name: Add SSH keys to ubuntu authorized_keys
+      lineinfile:
+        path: /home/ubuntu/.ssh/authorized_keys
+        line: "{{ item }}"
+        state: present
+        create: yes
+      loop: "{{ ssh_public_keys }}"
+
