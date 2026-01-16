@@ -2,9 +2,15 @@
 set -e
 
 PREFIX=${1:-ovpn-test-}
-DEST_DIR=${2:-$PWD/../logs}
+# DEST_DIR=${2:-$PWD/../logs}
+DEST_DIR=${2:-$(realpath "$(dirname "$0")/../logs")}
 
-mkdir -p "$DEST_DIR"
+# Remove old logs directory
+echo "🧹 Cleaning previous logs in $DEST_DIR..."
+# Protect against empty values and root value
+if [[ -n "$DEST_DIR" && "$DEST_DIR" != "/" ]]; then
+    rm -rf "$DEST_DIR"
+fi
 
 LXCS=( $(lxc list | awk "/$PREFIX/ {print \$2}") )
 
@@ -16,6 +22,9 @@ for LXC in "${LXCS[@]}"; do
     done
     echo "✅ $LXC finished tests."
 done
+
+# make logs directory after lxc finished tests
+mkdir -p "$DEST_DIR"
 
 # Pull logs from each LXC
 for LXC in "${LXCS[@]}"; do
