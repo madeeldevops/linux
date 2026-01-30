@@ -2,8 +2,9 @@
 set -e
 
 PREFIX=${1:-ovpn-test-}
-# DEST_DIR=${2:-$PWD/../logs}
+
 DEST_DIR=${2:-$(realpath "$(dirname "$0")/../logs")}
+RAW_RESULTS_DIR="$(dirname "$DEST_DIR")/raw-results"
 
 LXCS=( $(lxc list | awk "/$PREFIX/ {print \$2}") )
 
@@ -38,22 +39,6 @@ fi
 # make new logs directory
 mkdir -p "$DEST_DIR"
 
-# Pull logs from each LXC (sequential)
-# echo "Fetching logs from all LXCs..."
-# for LXC in "${LXCS[@]}"; do
-#     echo "Fetching logs from $LXC"
-#     mkdir -p "$DEST_DIR/$LXC"
-
-#     # pull results.log
-#     lxc file pull "$LXC"/root/results.log "$DEST_DIR/$LXC/" 2>/dev/null || true
-
-#     # pull new-results.log
-#     lxc file pull "$LXC"/root/new_results.log "$DEST_DIR/$LXC/" 2>/dev/null || true
-
-#     # pull master_log.txt 
-#     lxc file pull "$LXC"/root/master_log.txt "$DEST_DIR/$LXC/" 2>/dev/null || true
-# done
-
 # Pull logs from each LXC (parallel)
 echo "📥 Fetching logs from all LXCs in parallel..."
 
@@ -62,10 +47,10 @@ for LXC in "${LXCS[@]}"; do
     echo "Fetching logs from $LXC"
     mkdir -p "$DEST_DIR/$LXC"
 
-    lxc file pull "$LXC"/root/results.log \
+    lxc file pull "$LXC"/root/test_sh_output.log \
         "$DEST_DIR/$LXC/" 2>/dev/null || true
 
-    lxc file pull "$LXC"/root/new_results.log \
+    lxc file pull "$LXC"/root/raw_results.log \
         "$DEST_DIR/$LXC/" 2>/dev/null || true
 
     lxc file pull "$LXC"/root/master_log.txt \
@@ -79,8 +64,13 @@ echo "✅ Log fetching completed"
 # Merge logs
 echo "Merging logs from LXCs"
 cat "$DEST_DIR"/"$PREFIX"*/master_log.txt > "$DEST_DIR/master_log_merged.txt" 2>/dev/null || true
-cat "$DEST_DIR"/"$PREFIX"*/results.log > "$DEST_DIR/results_merged.log" 2>/dev/null || true
-cat "$DEST_DIR"/"$PREFIX"*/new_results.log > "$DEST_DIR/new_results_merged.log" 2>/dev/null || true
+cat "$DEST_DIR"/"$PREFIX"*/test_sh_output.log > "$DEST_DIR/test_sh_outputs_merged.log" 2>/dev/null || true
+
+# Merge all RAW results from all LXCs.
+TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+mkdir -p "$RAW_RESULTS_DIR"
+cat "$DEST_DIR"/"$PREFIX"*/raw_results.log > \
+    "$RAW_RESULTS_DIR/raw_results_merged_${TIMESTAMP}.log" 2>/dev/null || true
 
 echo "✅ Logs fetched and merged in $DEST_DIR"
 

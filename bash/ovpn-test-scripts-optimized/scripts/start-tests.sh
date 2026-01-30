@@ -127,7 +127,7 @@ echo "🚀 Starting tests in all LXCs..."
 for LXC_NAME in "${LXCS[@]}"; do
     lxc exec "$LXC_NAME" -- bash -c "
         LXC_NAME=$LXC_NAME nohup bash /root/test.sh \
-        >> /root/results.log 2>&1;
+        >> /root/test_sh_output.log 2>&1;
         touch /root/.tests_done
     " &
 done

@@ -1,10 +1,25 @@
 #!/usr/bin/env bash
 
-# Start timer for turning data from new_results_merged_log into a prettier format
+# Start timer for turning data from results_merged.log into a prettier format
 START_TIME=$(date +%s)
 
-INPUT="../logs/new_results_merged.log"
-OUTPUT="../logs/ovpn_testing_report.txt"
+# Make report directory if it does not exist
+REPORT_DIR="../clean-results"
+mkdir -p "$REPORT_DIR"
+
+# Defining output address for prettified timestamped report
+TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
+OUTPUT="$REPORT_DIR/clean_results_${TIMESTAMP}.txt"
+
+# Get latest raw-results-merged log file (this merged file contains raw results from all LXCs and will be prettified)
+RAW_RESULTS_DIR="../raw-results"
+INPUT=$(ls -1t "$RAW_RESULTS_DIR"/raw_results_merged_*.log 2>/dev/null | head -n 1)
+
+# error out if no file present 
+if [[ -z "$INPUT" ]]; then
+    echo "❌ No raw_results_merged logs found in $RAW_RESULTS_DIR"
+    exit 1
+fi
 
 > "$OUTPUT"
 
