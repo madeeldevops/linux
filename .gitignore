@@ -1,0 +1,8 @@
+# ignore real inventories
+**/inventory.local
+**/secrets.yml
+
+# ignore ssh keys
+*.pem
+*.key
+id_rsa*
